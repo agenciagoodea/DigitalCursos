@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  password      String
+  role          Role           @default(STUDENT)
+  avatar        String?
+  bio           String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  progress      Progress[]
+  certificates  Certificate[]
+  notifications Notification[]
+  enrollments   Enrollment[]
+  courses       Course[]       @relation("InstructorCourses")
+  reviews       Review[]
+  quizAttempts  QuizAttempt[]
+  comments      Comment[]
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+model Course {
+  id             String       @id @default(cuid())
+  title          String
+  description    String
+  thumbnail      String?
+  category       String
+  price          Float        @default(0)
+  level          String       @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  instructorId   String
+  instructor     User         @relation("InstructorCourses", fields: [instructorId], references: [id])
+  status         CourseStatus @default(DRAFT)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  modules        Module[]
+  enrollments    Enrollment[]
+  reviews        Review[]
+  certificates   Certificate[]
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Module {
+  id        String   @id @default(cuid())
+  title     String
+  order     Int
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons   Lesson[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lesson {
+  id          String     @id @default(cuid())
+  title       String
+  type        String     @default("video") // video, text, quiz
+  content     String?
+  videoUrl    String?
+  duration    Int        @default(0) // in seconds
+  order       Int
+  moduleId    String
+  module      Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress    Progress[]
+  attachments Attachment[]
+  comments    Comment[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  quiz        Quiz?
+}
+
+model Quiz {
+  id          String         @id @default(cuid())
+  lessonId    String         @unique
+  lesson      Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  minGrade    Float          @default(70)
+  maxAttempts Int?
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+}
+
+model QuizQuestion {
+  id            String   @id @default(cuid())
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  type          String   // multiple-choice, true-false, essay
+  question      String
+  options       String?  // JSON string of options
+  correctAnswer String?  // JSON string of correct answer
+  points        Int      @default(1)
+  order         Int
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers   String // JSON string of answers
+  score     Float
+  status    String   // pending, approved, failed
+  feedback  String?
+  createdAt DateTime @default(now())
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+model Progress {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Certificate {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  issuedAt  DateTime @default(now())
+  code      String   @unique
+
+  @@unique([userId, courseId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String   // info, success, warning, error
+  read      Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  likes     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
