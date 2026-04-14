@@ -152,8 +152,8 @@ export default function Settings() {
                 { label: "Comentários em Aulas", desc: "Notificar instrutores sobre novas dúvidas postadas." },
                 { label: "Conclusão de Curso", desc: "Enviar e-mail de parabéns ao aluno ao finalizar o curso." },
                 { label: "Lembretes de Inatividade", desc: "Enviar alerta para alunos que não acessam há 7 dias." },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-2">
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between py-2">
                   <div className="space-y-0.5">
                     <p className="text-sm font-bold text-slate-900">{item.label}</p>
                     <p className="text-xs text-slate-500">{item.desc}</p>
@@ -203,8 +203,8 @@ export default function Settings() {
                 { label: "Exigir letras maiúsculas", checked: true },
                 { label: "Exigir números", checked: true },
                 { label: "Exigir caracteres especiais", checked: false },
-              ].map((policy, i) => (
-                <div key={i} className="flex items-center justify-between py-1">
+              ].map((policy) => (
+                <div key={policy.label} className="flex items-center justify-between py-1">
                   <span className="text-sm text-slate-600">{policy.label}</span>
                   <Switch defaultChecked={policy.checked} />
                 </div>

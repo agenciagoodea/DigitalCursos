@@ -44,7 +44,7 @@ export default function AdminLayout({ user, setUser }: AdminLayoutProps) {
       { label: "Usuários", href: "/admin/users", icon: Users },
       { label: "Relatórios", href: "/admin/reports", icon: BarChart3 },
     ] : []),
-    { label: "Configurações", href: "/admin/settings", icon: Settings },
+    { label: "Configurações", href: user.role === 'ADMIN' ? "/admin/settings" : "/instructor/settings", icon: Settings },
   ];
 
   const SidebarContent = () => (
@@ -59,7 +59,7 @@ export default function AdminLayout({ user, setUser }: AdminLayoutProps) {
       <nav className="flex-1 px-4 space-y-1 mt-4">
         {navItems.map((item) => (
           <Link
-            key={item.href}
+            key={item.label}
             to={item.href}
             className={cn(
               "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group",

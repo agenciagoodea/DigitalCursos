@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   BarChart, 
@@ -62,8 +63,8 @@ export default function Reports() {
           { label: "Novos Alunos", value: "+2.350", icon: Users, trend: "+18.2%", positive: true },
           { label: "Cursos Ativos", value: "48", icon: BookOpen, trend: "-4.1%", positive: false },
           { label: "Taxa de Conclusão", value: "64%", icon: TrendingUp, trend: "+2.4%", positive: true },
-        ].map((stat, i) => (
-          <Card key={i} className="rounded-3xl border-none shadow-sm overflow-hidden">
+        ].map((stat) => (
+          <Card key={stat.label} className="rounded-3xl border-none shadow-sm overflow-hidden">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-2 bg-slate-50 rounded-xl">
@@ -134,7 +135,7 @@ export default function Reports() {
                   dataKey="value"
                 >
                   {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${entry.name}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -142,8 +143,8 @@ export default function Reports() {
             </ResponsiveContainer>
             <div className="space-y-2 ml-4">
               {categoryData.map((entry, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: COLORS[i] }}></div>
+                <div key={`label-${entry.name}`} className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
                   <span className="text-xs font-medium text-slate-600">{entry.name}</span>
                 </div>
               ))}
@@ -154,5 +155,3 @@ export default function Reports() {
     </div>
   );
 }
-
-import { cn } from "@/lib/utils";
